@@ -12,3 +12,4 @@ trimesh
 pyglet
 imageio
 plotly
+timm

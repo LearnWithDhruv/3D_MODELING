@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import os
 import plotly.graph_objects as go
+import torch
 from depth_estimation import estimate_depth
 from generate_3d_model import generate_3d_model
 
@@ -21,10 +22,10 @@ if uploaded_file:
     try:
         with open(image_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
-        st.image(image_path, caption="📷 Uploaded Image", use_column_width=True)
+        st.image(image_path, caption="📷 Uploaded Image", use_container_width=True)  # ✅ Fixed Streamlit Warning
     except Exception as e:
         st.error(f"❌ Error saving uploaded file: {e}")
-        st.stop()  # Stop execution if the file couldn't be saved
+        st.stop()
 
     # Depth Map Generation
     if st.button("🔍 Generate Depth Map"):
@@ -37,7 +38,7 @@ if uploaded_file:
                 depth_map_8bit = (depth_map * 255).astype(np.uint8)
                 cv2.imwrite(depth_map_path, depth_map_8bit)
 
-                st.image(depth_map_path, caption="🗺️ Depth Map", use_column_width=True)
+                st.image(depth_map_path, caption="🗺️ Depth Map", use_container_width=True)
                 st.session_state["depth_map_path"] = depth_map_path
                 st.success("✅ Depth map generated!")
         except FileNotFoundError:
@@ -72,3 +73,9 @@ if uploaded_file:
                 st.error(f"❌ Error generating 3D model: {e}")
         else:
             st.warning("⚠️ Generate a depth map first.")
+
+# ✅ Fix for Torch Issue (Set trust_repo=True to avoid warnings)
+try:
+    torch.hub.load("intel-isl/MiDaS", "MiDaS_small", trust_repo=True)
+except Exception as e:
+    st.error(f"❌ Torch Hub Error: {e}")
